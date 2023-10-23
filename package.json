@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "snarkjs": "^0.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.7",
+    "@types/snarkjs": "^0.7.6"
+  }
+}
