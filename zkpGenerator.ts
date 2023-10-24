@@ -2,7 +2,7 @@ import * as snarkjs from 'snarkjs';
 import { exec, execSync } from 'child_process';
 import * as fs from 'fs';
 
-class ZKPGenerator{
+export class ZKPGenerator{
     urlCircuit: string;
     nameCircuit: string;
 
@@ -13,7 +13,10 @@ class ZKPGenerator{
     }
 
     private circuitCompiler(urlCircuit:string){
-        execSync(`mkdir compiledCircuit && cd compiledCircuit && circom ../${urlCircuit} --r1cs --wasm --sym --c`);
+        if(!fs.existsSync("compiledCircuit")){
+            fs.mkdirSync("compiledCircuit");
+        }
+        execSync(`cd compiledCircuit && circom ../${urlCircuit} --r1cs --wasm --sym --c`);
     }
 
     private tauGenerator(){
@@ -21,7 +24,7 @@ class ZKPGenerator{
     }
 
     private keyGenerator(){
-        execSync(`cd compiledCircuit && npx snarkjs groth16 setup circuit.r1cs powersOfTau28_hez_final_12.ptau circuit_0000.zkey`)
+        execSync(`cd compiledCircuit && npx snarkjs groth16 setup ${this.nameCircuit}.r1cs powersOfTau28_hez_final_12.ptau circuit_0000.zkey`)
         execSync(`cd compiledCircuit && npx snarkjs zkey export verificationkey circuit_0000.zkey verification_key.json`)
     }
 
@@ -30,7 +33,7 @@ class ZKPGenerator{
         await this.keyGenerator();
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
             this.buildObject(inputs), 
-            "compiledCircuit/circuit_js/" + this.nameCircuit + ".wasm", 
+            `compiledCircuit/${this.nameCircuit}_js/` + this.nameCircuit + ".wasm", 
             "compiledCircuit/circuit_0000.zkey");
           console.log(publicSignals);
           console.log(proof);
@@ -56,5 +59,3 @@ class ZKPGenerator{
         return objetoConstruido;
       }
 }   
-
-export default ZKPGenerator;
