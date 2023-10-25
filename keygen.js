@@ -23,11 +23,11 @@ const witness = {
 const zkpGenerator = new ZKPGenerator("poseidonPK.circom", "poseidonPK");
 
 async function ejecutarZKP() {
-    const proofGenerated = await zkpGenerator.proofGenerator([["x", BigInt(pubKey.p.x.n.toFixed())], ["y", BigInt(pubKey.p.y.n.toFixed())]]);
+    const proofGenerated = await zkpGenerator.proofGenerator([["x", witness.x], ["y", witness.y]]);
     const result = await zkpGenerator.proofVerifier(proofGenerated.publicSignals, proofGenerated.proof);
 
     const poseidon = await Circomlib.buildPoseidon();
-    let poseidonHash = poseidon.F.toString([(pubKey.p.x.n.toFixed()), (pubKey.p.x.n.toFixed())]);
+    let poseidonHash = poseidon.F.toString(poseidon([witness.x, witness.y]));
   
     if(result){
         console.log("Generated poseidon hash: ", poseidonHash);
